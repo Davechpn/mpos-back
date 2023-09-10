@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//env("DATABASE_URL")
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@localhost:5432/testdb?schema=public"
+}
+
+//DOMAIN MODELS //////////////////////////////////////////////////////////////
+model Industry {
+  id   String @id @default(uuid())
+  name String @unique
+}
+
+model Country {
+  id   String @id @default(uuid())
+  name String @unique
+}
+
+//DOMAIN MODELS //////////////////////////////////////////////////////////////
+
+//INTERNAL MODELS ////////////////////////////////////////////////////////////
+model User {
+  id                String   @id @default(uuid())
+  name              String
+  email             String
+  avatar            String
+  role_id           String
+  teams             string[]
+  suspendend_date: number | null
+  contact:Contact | null
+  country:string | null
+  status            string
+  verification_code number
+  created_date      number
+  created_by        string
+  timestamp         number
+}
+
+//INTERNAL MODELS ///////////////////////////////////////////////////////////
+
+//CLIENTS MODELS ////////////////////////////////////////////////////////////
+//CLIENTS MODELS ////////////////////////////////////////////////////////////
+
+//PREMIUMS MODELS ////////////////////////////////////////////////////////////
+model Feature {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  type        String
+  industries  String[]
+  countries   String[]
+}
+
+model Package {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  prices      Json
+  features    String[]
+  color       String
+  level       Int
+}
+
+// model Promotion {
+//   id           Int
+//   name         String
+//   description  String
+//   start_date   DateTime
+//   end_date     DateTime
+//   features     string[]
+//   industries   string[]
+//   countries    string[]
+//   package_id:string,
+//   created_by   string
+//   created_date number
+// }
+
+//PREMIUMS MODELS ////////////////////////////////////////////////////////////
+
+//TEMPLATES MODELS //////////////////////////////////////////////////////////////
+
+//TEMPLATES MODELS //////////////////////////////////////////////////////////////

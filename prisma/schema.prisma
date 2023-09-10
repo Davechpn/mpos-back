@@ -73,6 +73,7 @@ model User {
   Payment           Payment[]
   CreatedTemplates  BrandTemplate[] @relation("CreatedTemplates")
   ReviewedTemplates BrandTemplate[] @relation("ReviewedTemplates")
+  ClientEdit        ClientEdit[]
 }
 
 model Role {
@@ -137,21 +138,21 @@ enum PermissionTypes {
 }
 
 enum TaskStage {
-  complete
-  inProgress
-  todo
+  Complete
+  InProgress
+  Todo
 }
 
 enum TaskPriority {
-  low
-  medium
-  high
+  Low
+  Medium
+  High
 }
 
 enum UserStatus {
-  active
-  suspendend
-  invited
+  Active
+  Suspendend
+  Invited
 }
 
 //INTERNAL MODELS ///////////////////////////////////////////////////////////
@@ -168,9 +169,9 @@ enum UserStatus {
 //PREMIUMS MODELS ////////////////////////////////////////////////////////////
 model Feature {
   id          Int         @id @default(autoincrement())
-  name        String
-  description String
-  type        String
+  name        String      @unique
+  description String?
+  type        FeatureType @default(Free)
   industries  String[]
   countries   String[]
   Promotions  Promotion[]
@@ -178,7 +179,7 @@ model Feature {
 
 model Package {
   id          String         @id @default(uuid())
-  name        String
+  name        String         @unique
   description String?
   price       PackagePrice[]
   features    String[]
@@ -227,6 +228,11 @@ model Payment {
   createAt      DateTime @default(now())
 }
 
+enum FeatureType {
+  Free
+  Premium
+}
+
 //PREMIUMS MODELS ////////////////////////////////////////////////////////////
 //
 //
@@ -236,21 +242,21 @@ model Payment {
 
 model Category {
   id            String          @id @default(uuid())
-  name          String
-  description   String
-  icon          String
+  name          String          @unique
+  description   String?
+  icon          String?
   industries    Industry[]
-  createdBy     String
+  createdBy     String?
   createdAt     DateTime        @default(now())
   BrandTemplate BrandTemplate[]
 }
 
 model Image {
   id                String          @id @default(uuid())
-  url               String
-  incomplete        Boolean
-  incompleteMessage String
-  isTransparent     Boolean
+  url               String          @unique
+  incomplete        Boolean?
+  incompleteMessage String?
+  isTransparent     Boolean?
   side              ImageSide       @default(front)
   BrandTemplate     BrandTemplate[]
 }
@@ -279,28 +285,32 @@ enum DarftSources {
 }
 
 model ClientEdit {
-  id              String        @id @default(uuid())
-  clientId        String
-  action          String
+  id              String           @id @default(uuid())
+  clientId        String?
+  action          ClientEditAction
   field           String
   newValue        String
   oldValue        String
-  approved        Boolean
-  approvedTime    DateTime
-  approvedBy      String
-  reviewed        Boolean
-  reviewedBy      String
-  reviewedAt      DateTime
-  BrandTemplate   BrandTemplate @relation(fields: [BrandTemplateId], references: [id])
+  approved        Boolean?
+  approvedTime    DateTime?
+  approvedBy      User?            @relation(fields: [approvedById], references: [id])
+  approvedById    String?
+  BrandTemplate   BrandTemplate    @relation(fields: [BrandTemplateId], references: [id])
   BrandTemplateId String
+}
+
+enum ClientEditAction {
+  Added
+  Changed
+  Removed
 }
 
 model ClientRating {
   id                String        @id @default(uuid())
   client_id         String
   rating            Int
-  goodImplematation Boolean
-  comment           String
+  goodImplematation Boolean?
+  comment           String?
   BrandTemplate     BrandTemplate @relation(fields: [BrandTemplateId], references: [id])
   BrandTemplateId   String
 }
@@ -315,13 +325,13 @@ model Tel {
 
 model BrandTemplate {
   id                     String         @id @default(uuid())
-  name                   String
-  description            String
+  name                   String         @unique
+  description            String?
   tags                   String[]
-  image                  Image          @relation(fields: [imageId], references: [id])
-  imageId                String
-  threeDImage            String
-  video                  String
+  image                  Image?         @relation(fields: [imageId], references: [id])
+  imageId                String?
+  threeDImage            String?
+  video                  String?
   sizes                  String[]
   units                  String[]
   category               Category       @relation(fields: [categoryId], references: [id])
@@ -329,35 +339,35 @@ model BrandTemplate {
   addon_categories       String[]
   varieties              String[]
   manufacturer           String
-  street_address         String
-  city                   String
-  country                Country        @relation(fields: [countryId], references: [id])
-  countryId              String
-  email                  String
+  street_address         String?
+  city                   String?
+  country                Country?       @relation(fields: [countryId], references: [id])
+  countryId              String?
+  email                  String?
   telNumbers             Tel[]
-  website                String
-  draftNotes             String
-  draftType              String
+  website                String?
+  draftNotes             String?
+  draftType              String?
   draftCreatedAt         DateTime
-  createdBy              User           @relation("CreatedTemplates", fields: [createdById], references: [id])
-  createdById            String
+  createdBy              User?          @relation("CreatedTemplates", fields: [createdById], references: [id])
+  createdById            String?
   createdAt              DateTime       @default(now())
-  reviewedAt             DateTime
-  reviewNotes            String
-  reviewer               User           @relation("ReviewedTemplates", fields: [reviewerId], references: [id])
-  reviewerId             String
-  inReview               Boolean
-  isApproved             Boolean
+  reviewedAt             DateTime?
+  reviewNotes            String?
+  reviewer               User?          @relation("ReviewedTemplates", fields: [reviewerId], references: [id])
+  reviewerId             String?
+  inReview               Boolean?
+  isApproved             Boolean?
   lastModified           DateTime       @updatedAt
   client_edits           ClientEdit[]
-  creatorClientId        String
-  creatorClientProductId String
-  fromClientCleanedBy    String
+  creatorClientId        String?
+  creatorClientProductId String?
+  fromClientCleanedBy    String?
   ImplementationRatings  ClientRating[]
-  hasZeroDepositOrder    Boolean
-  hasTransparencyAll     Boolean
-  isNotForUnder18        Boolean
-  isDirty                Boolean
+  hasZeroDepositOrder    Boolean?
+  hasTransparencyAll     Boolean?
+  isNotForUnder18        Boolean?
+  isDirty                Boolean?
 }
 
 //TEMPLATES MODELS //////////////////////////////////////////////////////////////

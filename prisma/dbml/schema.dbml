@@ -1,0 +1,182 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Industry {
+  id String [pk]
+  name String [unique, not null]
+  Promotions Promotion [not null]
+}
+
+Table Country {
+  id String [pk]
+  name String [unique, not null]
+  User User [not null]
+  Promotions Promotion [not null]
+}
+
+Table User {
+  id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  avatar String
+  role Role
+  roleId String
+  teams Team [not null]
+  suspendendAt DateTime
+  status UserStatus [not null]
+  streetAddress String
+  city String
+  cell String
+  tell String
+  verificationCode Int
+  createdAt DateTime [default: `now()`, not null]
+  country Country
+  countryId String
+  AssignedTasks Task [not null]
+  CreatedTasks Task [not null]
+  Promotion Promotion [not null]
+}
+
+Table Role {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  permissions Permissions [not null]
+  User User [not null]
+}
+
+Table Permissions {
+  id String [pk]
+  domain String [unique, not null]
+  accessLevel PermissionTypes [not null, default: 'Viewer']
+  Role Role [not null]
+}
+
+Table Team {
+  id String [pk]
+  name String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  leader String [not null]
+  User User
+  userId String
+  Goals Goal [not null]
+}
+
+Table Goal {
+  id String [pk]
+  teams Team [not null]
+  title String [unique, not null]
+  description String
+  startDate DateTime
+  createdAt DateTime [default: `now()`, not null]
+  deadline DateTime
+  active Boolean
+  isComplete Boolean
+  tasks Task [not null]
+}
+
+Table Task {
+  id String [pk]
+  title String [unique, not null]
+  comments String
+  createdAt DateTime [default: `now()`, not null]
+  startDate DateTime
+  dueDate DateTime
+  priority TaskPriority
+  stage TaskStage
+  Goal Goal
+  GoalId String
+  assignee User
+  assigneeId String
+  createdBy User
+  createdById String
+}
+
+Table Feature {
+  id Int [pk, increment]
+  name String [not null]
+  description String [not null]
+  type String [not null]
+  industries String[] [not null]
+  countries String[] [not null]
+  Promotions Promotion [not null]
+}
+
+Table Package {
+  id String [pk]
+  name String [not null]
+  description String
+  price PackagePrice [not null]
+  features String[] [not null]
+  color String
+  level Int [not null]
+  Promotion Promotion
+}
+
+Table PackagePrice {
+  id String [pk]
+  duration BigInt [not null]
+  amount Float [not null]
+  extention_time BigInt
+  Package Package
+  packageId String
+}
+
+Table Promotion {
+  id String [pk]
+  name String [not null]
+  description String
+  startDate DateTime [not null]
+  endDate DateTime [not null]
+  features Feature [not null]
+  industries Industry [not null]
+  countries Country [not null]
+  package Package
+  packageId String [unique]
+  createdBy User
+  createdById String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Enum PermissionTypes {
+  Viewer
+  Editor
+  Admin
+}
+
+Enum TaskStage {
+  complete
+  inProgress
+  todo
+}
+
+Enum TaskPriority {
+  low
+  medium
+  high
+}
+
+Enum UserStatus {
+  active
+  suspendend
+  invited
+}
+
+Ref: User.roleId > Role.id
+
+Ref: User.countryId > Country.id
+
+Ref: Team.userId > User.id
+
+Ref: Task.GoalId > Goal.id
+
+Ref: Task.assigneeId > User.id
+
+Ref: Task.createdById > User.id
+
+Ref: PackagePrice.packageId > Package.id
+
+Ref: Promotion.packageId - Package.id
+
+Ref: Promotion.createdById > User.id

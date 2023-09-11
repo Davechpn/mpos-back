@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PackagesService } from './packages.service';
-import { PackagesGateway } from './packages.gateway';
+import { PackagesController } from './packages.controller';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
-  providers: [PackagesGateway, PackagesService],
+  controllers: [PackagesController],
+  providers: [PackagesService, PrismaService],
 })
-export class PackagesModule {}
+export class PackagesModule { }

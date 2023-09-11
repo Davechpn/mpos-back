@@ -1,15 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
+import { PrismaService } from 'src/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PackagesService {
+  constructor(private prisma: PrismaService) { }
+
   create(createPackageDto: CreatePackageDto) {
-    return 'This action adds a new package';
+    return this.prisma.package.create({
+      data: {
+        name: createPackageDto.name,
+        description: createPackageDto.description,
+        color: createPackageDto.color,
+        level: createPackageDto.level,
+        prices: {
+          create: createPackageDto.prices
+        }
+      }
+    })
   }
 
   findAll() {
-    return `This action returns all packages`;
+    return this.prisma.package.findMany({
+      include: {
+        prices: true
+      }
+    })
   }
 
   findOne(id: number) {

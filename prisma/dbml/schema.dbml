@@ -5,37 +5,48 @@
 Table Industry {
   id String [pk]
   name String [unique, not null]
-  Promotions Promotion [not null]
+  promotions Promotion [not null]
+  categories Category [not null]
+  features Feature [not null]
 }
 
 Table Country {
   id String [pk]
   name String [unique, not null]
-  User User [not null]
-  Promotions Promotion [not null]
+  user User [not null]
+  promotions Promotion [not null]
+  brandTemplate BrandTemplate [not null]
+  features Feature [not null]
 }
 
 Table User {
   id String [pk]
   name String [not null]
   email String [unique, not null]
+  password String
+  token String
+  fcm_token String
   avatar String
   role Role
   roleId String
-  teams Team [not null]
   suspendendAt DateTime
-  status UserStatus [not null]
+  status UserStatus
   streetAddress String
   city String
   cell String
   tell String
   verificationCode Int
-  createdAt DateTime [default: `now()`, not null]
   country Country
   countryId String
-  AssignedTasks Task [not null]
-  CreatedTasks Task [not null]
-  Promotion Promotion [not null]
+  teams Team [not null]
+  assignedTasks Task [not null]
+  createdTasks Task [not null]
+  promotion Promotion [not null]
+  payment Payment [not null]
+  createdTemplates BrandTemplate [not null]
+  reviewedTemplates BrandTemplate [not null]
+  clientEdits ClientEdit [not null]
+  createdAt DateTime [default: `now()`, not null]
 }
 
 Table Role {
@@ -43,7 +54,7 @@ Table Role {
   name String [unique, not null]
   description String
   permissions Permissions [not null]
-  User User [not null]
+  user User [not null]
 }
 
 Table Permissions {
@@ -58,9 +69,9 @@ Table Team {
   name String [not null]
   createdAt DateTime [default: `now()`, not null]
   leader String [not null]
-  User User
+  user User
   userId String
-  Goals Goal [not null]
+  goals Goal [not null]
 }
 
 Table Goal {
@@ -94,31 +105,33 @@ Table Task {
 }
 
 Table Feature {
-  id Int [pk, increment]
-  name String [not null]
-  description String [not null]
-  type String [not null]
-  industries String[] [not null]
-  countries String[] [not null]
-  Promotions Promotion [not null]
+  id String [pk]
+  name String [unique, not null]
+  description String
+  type FeatureType [not null, default: 'Free']
+  industries Industry [not null]
+  countries Country [not null]
+  promotions Promotion [not null]
+  packages Package [not null]
 }
 
 Table Package {
   id String [pk]
-  name String [not null]
+  name String [unique, not null]
   description String
-  price PackagePrice [not null]
-  features String[] [not null]
+  prices PackagePrice [not null]
+  features Feature [not null]
   color String
-  level Int [not null]
-  Promotion Promotion
+  level Int [unique, not null]
+  promotions Promotion [not null]
+  payment Payment [not null]
 }
 
 Table PackagePrice {
   id String [pk]
-  duration BigInt [not null]
+  duration Float [not null]
   amount Float [not null]
-  extention_time BigInt
+  extentionTime Float
   Package Package
   packageId String
 }
@@ -132,11 +145,125 @@ Table Promotion {
   features Feature [not null]
   industries Industry [not null]
   countries Country [not null]
-  package Package
-  packageId String [unique]
+  packages Package [not null]
   createdBy User
   createdById String
   createdAt DateTime [default: `now()`, not null]
+}
+
+Table Payment {
+  id String [pk]
+  amount Decimal [not null]
+  date DateTime [not null]
+  center String
+  package Package [not null]
+  packageId String [not null]
+  paymentMethod String [not null]
+  cashier User [not null]
+  cashierId String [not null]
+  revoked Boolean
+  createAt DateTime [default: `now()`, not null]
+}
+
+Table Category {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  icon String
+  industries Industry [not null]
+  createdBy String
+  createdAt DateTime [default: `now()`, not null]
+  brandTemplate BrandTemplate [not null]
+}
+
+Table Image {
+  id String [pk]
+  url String [unique, not null]
+  incomplete Boolean
+  incompleteMessage String
+  isTransparent Boolean
+  side ImageSide [not null, default: 'front']
+  brandTemplate BrandTemplate [not null]
+}
+
+Table ClientEdit {
+  id String [pk]
+  clientId String
+  action ClientEditAction [not null]
+  field String [not null]
+  newValue String [not null]
+  oldValue String [not null]
+  approved Boolean
+  approvedTime DateTime
+  approvedBy User
+  approvedById String
+  brandTemplate BrandTemplate [not null]
+  brandTemplateId String [not null]
+}
+
+Table ClientRating {
+  id String [pk]
+  client_id String [not null]
+  rating Int [not null]
+  goodImplematation Boolean
+  comment String
+  brandTemplate BrandTemplate [not null]
+  brandTemplateId String [not null]
+}
+
+Table Tel {
+  id String [pk]
+  name String [not null]
+  number String [not null]
+  brandTemplate BrandTemplate [not null]
+  brandTemplateId String [not null]
+}
+
+Table BrandTemplate {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  tags String[] [not null]
+  image Image
+  imageId String
+  threeDImage String
+  video String
+  sizes String[] [not null]
+  units String[] [not null]
+  category Category [not null]
+  categoryId String [not null]
+  addon_categories String[] [not null]
+  varieties String[] [not null]
+  manufacturer String [not null]
+  street_address String
+  city String
+  country Country
+  countryId String
+  email String
+  telNumbers Tel [not null]
+  website String
+  draftNotes String
+  draftType String
+  draftCreatedAt DateTime [not null]
+  createdBy User
+  createdById String
+  createdAt DateTime [default: `now()`, not null]
+  reviewedAt DateTime
+  reviewNotes String
+  reviewer User
+  reviewerId String
+  inReview Boolean
+  isApproved Boolean
+  lastModified DateTime [not null]
+  client_edits ClientEdit [not null]
+  creatorClientId String
+  creatorClientProductId String
+  fromClientCleanedBy String
+  implementationRatings ClientRating [not null]
+  hasZeroDepositOrder Boolean
+  hasTransparencyAll Boolean
+  isNotForUnder18 Boolean
+  isDirty Boolean
 }
 
 Enum PermissionTypes {
@@ -146,21 +273,55 @@ Enum PermissionTypes {
 }
 
 Enum TaskStage {
-  complete
-  inProgress
-  todo
+  Complete
+  InProgress
+  Todo
 }
 
 Enum TaskPriority {
-  low
-  medium
-  high
+  Low
+  Medium
+  High
 }
 
 Enum UserStatus {
-  active
-  suspendend
-  invited
+  Active
+  Suspendend
+  Invited
+}
+
+Enum FeatureType {
+  Free
+  Premium
+}
+
+Enum ImageSide {
+  front
+  left
+  right
+  back
+  inside
+}
+
+Enum DraftType {
+  FromClient
+  InProgress
+  Rejected
+  Review
+  ClientEdits
+}
+
+Enum DarftSources {
+  Client
+  Mine
+  Reviewer
+  Admin
+}
+
+Enum ClientEditAction {
+  Added
+  Changed
+  Removed
 }
 
 Ref: User.roleId > Role.id
@@ -177,6 +338,26 @@ Ref: Task.createdById > User.id
 
 Ref: PackagePrice.packageId > Package.id
 
-Ref: Promotion.packageId - Package.id
-
 Ref: Promotion.createdById > User.id
+
+Ref: Payment.packageId > Package.id
+
+Ref: Payment.cashierId > User.id
+
+Ref: ClientEdit.approvedById > User.id
+
+Ref: ClientEdit.brandTemplateId > BrandTemplate.id
+
+Ref: ClientRating.brandTemplateId > BrandTemplate.id
+
+Ref: Tel.brandTemplateId > BrandTemplate.id
+
+Ref: BrandTemplate.imageId > Image.id
+
+Ref: BrandTemplate.categoryId > Category.id
+
+Ref: BrandTemplate.countryId > Country.id
+
+Ref: BrandTemplate.createdById > User.id
+
+Ref: BrandTemplate.reviewerId > User.id

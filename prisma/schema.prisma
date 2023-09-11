@@ -29,17 +29,18 @@ datasource db {
 model Industry {
   id         String      @id @default(uuid())
   name       String      @unique
-  Promotions Promotion[]
-  Category   Category    @relation(fields: [CategoryId], references: [id])
-  CategoryId String
+  promotions Promotion[]
+  categories Category[]
+  features   Feature[]
 }
 
 model Country {
   id            String          @id @default(uuid())
   name          String          @unique
-  User          User[]
-  Promotions    Promotion[]
-  BrandTemplate BrandTemplate[]
+  user          User[]
+  promotions    Promotion[]
+  brandTemplate BrandTemplate[]
+  features      Feature[]
 }
 
 //DOMAIN MODELS //////////////////////////////////////////////////////////////
@@ -53,27 +54,30 @@ model User {
   id                String          @id @default(uuid())
   name              String
   email             String          @unique
+  password          String?
+  token             String?
+  fcm_token         String?
   avatar            String?
   role              Role?           @relation(fields: [roleId], references: [id])
   roleId            String?
-  teams             Team[]
   suspendendAt      DateTime?
-  status            UserStatus
+  status            UserStatus?
   streetAddress     String?
   city              String?
   cell              String?
   tell              String?
   verificationCode  Int?
-  createdAt         DateTime        @default(now())
   country           Country?        @relation(fields: [countryId], references: [id])
   countryId         String?
-  AssignedTasks     Task[]          @relation("AssignedTasks")
-  CreatedTasks      Task[]          @relation("CreatedTasks")
-  Promotion         Promotion[]
-  Payment           Payment[]
-  CreatedTemplates  BrandTemplate[] @relation("CreatedTemplates")
-  ReviewedTemplates BrandTemplate[] @relation("ReviewedTemplates")
-  ClientEdit        ClientEdit[]
+  teams             Team[]
+  assignedTasks     Task[]          @relation("assignedTasks")
+  createdTasks      Task[]          @relation("createdTasks")
+  promotion         Promotion[]
+  payment           Payment[]
+  createdTemplates  BrandTemplate[] @relation("createdTemplates")
+  reviewedTemplates BrandTemplate[] @relation("reviewedTemplates")
+  clientEdits       ClientEdit[]
+  createdAt         DateTime        @default(now())
 }
 
 model Role {
@@ -81,7 +85,7 @@ model Role {
   name        String        @unique
   description String?
   permissions Permissions[]
-  User        User[]
+  user        User[]
 }
 
 model Permissions {
@@ -96,9 +100,9 @@ model Team {
   name      String
   createdAt DateTime @default(now())
   leader    String
-  User      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   userId    String?
-  Goals     Goal[]
+  goals     Goal[]
 }
 
 model Goal {
@@ -125,9 +129,9 @@ model Task {
   stage       TaskStage?
   Goal        Goal?         @relation(fields: [GoalId], references: [id])
   GoalId      String?
-  assignee    User?         @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  assignee    User?         @relation("assignedTasks", fields: [assigneeId], references: [id])
   assigneeId  String?
-  createdBy   User?         @relation("CreatedTasks", fields: [createdById], references: [id])
+  createdBy   User?         @relation("createdTasks", fields: [createdById], references: [id])
   createdById String?
 }
 
@@ -168,34 +172,35 @@ enum UserStatus {
 //
 //PREMIUMS MODELS ////////////////////////////////////////////////////////////
 model Feature {
-  id          Int         @id @default(autoincrement())
+  id          String      @id @default(uuid())
   name        String      @unique
   description String?
   type        FeatureType @default(Free)
-  industries  String[]
-  countries   String[]
-  Promotions  Promotion[]
+  industries  Industry[]
+  countries   Country[]
+  promotions  Promotion[]
+  packages    Package[]
 }
 
 model Package {
   id          String         @id @default(uuid())
   name        String         @unique
   description String?
-  price       PackagePrice[]
-  features    String[]
+  prices      PackagePrice[]
+  features    Feature[]
   color       String?
-  level       Int
-  Promotion   Promotion?
-  Payment     Payment[]
+  level       Int            @unique
+  promotions  Promotion[]
+  payment     Payment[]
 }
 
 model PackagePrice {
-  id             String   @id @default(uuid())
-  duration       BigInt
-  amount         Float
-  extention_time BigInt?
-  Package        Package? @relation(fields: [packageId], references: [id])
-  packageId      String?
+  id            String   @id @default(uuid())
+  duration      Float
+  amount        Float
+  extentionTime Float?
+  Package       Package? @relation(fields: [packageId], references: [id])
+  packageId     String?
 }
 
 model Promotion {
@@ -207,8 +212,7 @@ model Promotion {
   features    Feature[]
   industries  Industry[]
   countries   Country[]
-  package     Package?   @relation(fields: [packageId], references: [id])
-  packageId   String?    @unique
+  packages    Package[]
   createdBy   User?      @relation(fields: [createdById], references: [id])
   createdById String?
   createdAt   DateTime   @default(now())
@@ -248,7 +252,7 @@ model Category {
   industries    Industry[]
   createdBy     String?
   createdAt     DateTime        @default(now())
-  BrandTemplate BrandTemplate[]
+  brandTemplate BrandTemplate[]
 }
 
 model Image {
@@ -258,7 +262,7 @@ model Image {
   incompleteMessage String?
   isTransparent     Boolean?
   side              ImageSide       @default(front)
-  BrandTemplate     BrandTemplate[]
+  brandTemplate     BrandTemplate[]
 }
 
 enum ImageSide {
@@ -295,8 +299,8 @@ model ClientEdit {
   approvedTime    DateTime?
   approvedBy      User?            @relation(fields: [approvedById], references: [id])
   approvedById    String?
-  BrandTemplate   BrandTemplate    @relation(fields: [BrandTemplateId], references: [id])
-  BrandTemplateId String
+  brandTemplate   BrandTemplate    @relation(fields: [brandTemplateId], references: [id])
+  brandTemplateId String
 }
 
 enum ClientEditAction {
@@ -311,16 +315,16 @@ model ClientRating {
   rating            Int
   goodImplematation Boolean?
   comment           String?
-  BrandTemplate     BrandTemplate @relation(fields: [BrandTemplateId], references: [id])
-  BrandTemplateId   String
+  brandTemplate     BrandTemplate @relation(fields: [brandTemplateId], references: [id])
+  brandTemplateId   String
 }
 
 model Tel {
   id              String        @id @default(uuid())
   name            String
   number          String
-  BrandTemplate   BrandTemplate @relation(fields: [BrandTemplateId], references: [id])
-  BrandTemplateId String
+  brandTemplate   BrandTemplate @relation(fields: [brandTemplateId], references: [id])
+  brandTemplateId String
 }
 
 model BrandTemplate {
@@ -349,12 +353,12 @@ model BrandTemplate {
   draftNotes             String?
   draftType              String?
   draftCreatedAt         DateTime
-  createdBy              User?          @relation("CreatedTemplates", fields: [createdById], references: [id])
+  createdBy              User?          @relation("createdTemplates", fields: [createdById], references: [id])
   createdById            String?
   createdAt              DateTime       @default(now())
   reviewedAt             DateTime?
   reviewNotes            String?
-  reviewer               User?          @relation("ReviewedTemplates", fields: [reviewerId], references: [id])
+  reviewer               User?          @relation("reviewedTemplates", fields: [reviewerId], references: [id])
   reviewerId             String?
   inReview               Boolean?
   isApproved             Boolean?
@@ -363,7 +367,7 @@ model BrandTemplate {
   creatorClientId        String?
   creatorClientProductId String?
   fromClientCleanedBy    String?
-  ImplementationRatings  ClientRating[]
+  implementationRatings  ClientRating[]
   hasZeroDepositOrder    Boolean?
   hasTransparencyAll     Boolean?
   isNotForUnder18        Boolean?

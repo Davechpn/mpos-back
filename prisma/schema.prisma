@@ -50,6 +50,30 @@ model Country {
 //
 //
 //INTERNAL MODELS ////////////////////////////////////////////////////////////
+model Role {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  description String?
+  permissions Permissions[]
+  user        User[]
+}
+
+model Domain {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  description String?
+  permissions Permissions[]
+}
+
+model Permissions {
+  id          String          @id @default(uuid())
+  accessLevel PermissionTypes @default(Viewer)
+  domain      Domain          @relation(fields: [domainId], references: [id])
+  role        Role            @relation(fields: [roleId], references: [id])
+  domainId    String
+  roleId      String
+}
+
 model User {
   id                String          @id @default(uuid())
   name              String
@@ -78,21 +102,6 @@ model User {
   reviewedTemplates BrandTemplate[] @relation("reviewedTemplates")
   clientEdits       ClientEdit[]
   createdAt         DateTime        @default(now())
-}
-
-model Role {
-  id          String        @id @default(uuid())
-  name        String        @unique
-  description String?
-  permissions Permissions[]
-  user        User[]
-}
-
-model Permissions {
-  id          String          @id @default(uuid())
-  domain      String          @unique
-  accessLevel PermissionTypes @default(Viewer)
-  Role        Role[]
 }
 
 model Team {

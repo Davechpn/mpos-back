@@ -19,6 +19,30 @@ Table Country {
   features Feature [not null]
 }
 
+Table Role {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  permissions Permissions [not null]
+  user User [not null]
+}
+
+Table Domain {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  permissions Permissions [not null]
+}
+
+Table Permissions {
+  id String [pk]
+  accessLevel PermissionTypes [not null, default: 'Viewer']
+  domain Domain [not null]
+  role Role [not null]
+  domainId String [not null]
+  roleId String [not null]
+}
+
 Table User {
   id String [pk]
   name String [not null]
@@ -47,21 +71,6 @@ Table User {
   reviewedTemplates BrandTemplate [not null]
   clientEdits ClientEdit [not null]
   createdAt DateTime [default: `now()`, not null]
-}
-
-Table Role {
-  id String [pk]
-  name String [unique, not null]
-  description String
-  permissions Permissions [not null]
-  user User [not null]
-}
-
-Table Permissions {
-  id String [pk]
-  domain String [unique, not null]
-  accessLevel PermissionTypes [not null, default: 'Viewer']
-  Role Role [not null]
 }
 
 Table Team {
@@ -323,6 +332,10 @@ Enum ClientEditAction {
   Changed
   Removed
 }
+
+Ref: Permissions.domainId > Domain.id
+
+Ref: Permissions.roleId > Role.id
 
 Ref: User.roleId > Role.id
 
